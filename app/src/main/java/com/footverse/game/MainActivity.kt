@@ -15,11 +15,11 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-        setContentView(FootverseView())
+        setContentView(FootverseView(this))
     }
 }
 
-private class FootverseView : View {
+private class FootverseView(context: android.content.Context) : View(context) {
     private val p = Paint(Paint.ANTI_ALIAS_FLAG)
     private val teams = listOf("INDIA", "PORTUGAL", "ARGENTINA", "FRANCE", "BRAZIL", "GERMANY", "USA", "SPAIN", "ENGLAND", "JAPAN")
     private var teamIndex = 0
@@ -37,8 +37,6 @@ private class FootverseView : View {
     private var ballVy = 0f
     private var lastW = 0f
     private var lastH = 0f
-
-    constructor() : super(null)
 
     override fun onDraw(c: Canvas) {
         super.onDraw(c)
