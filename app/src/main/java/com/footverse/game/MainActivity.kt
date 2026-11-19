@@ -62,6 +62,7 @@ private class FootverseView(context: android.content.Context) : View(context) {
     private var lastW = 0f
     private var lastH = 0f
     private var tournamentRound = 1
+    private var tournamentMode = false
     private var tournamentWins = 0
     private var matchNumber = 1
     private var lastGoal = 0L
@@ -164,6 +165,7 @@ private class FootverseView(context: android.content.Context) : View(context) {
     }
 
     private fun startMatch(tournament: Boolean = false) {
+        tournamentMode = tournament
         opponentIndex = (teamIndex + if (tournament) (tournamentRound + 2) else 1) % teams.size
         if (opponentIndex == teamIndex) opponentIndex = (opponentIndex + 1) % teams.size
         scoreHome = 0; scoreAway = 0; seconds = if (tournament) 150 else 120
@@ -198,8 +200,10 @@ private class FootverseView(context: android.content.Context) : View(context) {
         if (now - lastTick >= 1000) { seconds = max(0, seconds - 1); lastTick = now }
         if (seconds <= 0) {
             screen = 5
-            if (scoreHome > scoreAway && tournamentRound < 4) { tournamentWins++; tournamentRound++ }
-            else if (scoreHome > scoreAway) tournamentWins++
+            if (tournamentMode && scoreHome > scoreAway) {
+                tournamentWins++
+                if (tournamentRound < 4) tournamentRound++ else tournamentRound = 5
+            }
             return
         }
         drawPitch(c, w, h)
@@ -278,8 +282,8 @@ private class FootverseView(context: android.content.Context) : View(context) {
         text(c, teams[teamIndex] + "  " + scoreHome + " - " + scoreAway + "  " + teams[opponentIndex], w / 2, h * .38f, h * .065f, Color.rgb(70, 220, 160))
         val won = scoreHome > scoreAway
         text(c, if (scoreHome == scoreAway) "MATCH DRAWN" else if (won) "VICTORY!" else "BETTER LUCK NEXT TIME", w / 2, h * .52f, h * .07f, Color.WHITE)
-        if (tournamentRound > 4 && tournamentWins > 0) text(c, "CUP CHAMPION • WINS " + tournamentWins, w / 2, h * .63f, h * .05f, Color.rgb(255, 210, 65))
-        button(c, if (tournamentRound <= 4 && won) "NEXT CUP MATCH" else "PLAY AGAIN", w * .34f, h * .72f, w * .66f, h * .86f)
+        if (tournamentMode && tournamentRound > 4 && tournamentWins > 0) text(c, "CUP CHAMPION • WINS " + tournamentWins, w / 2, h * .63f, h * .05f, Color.rgb(255, 210, 65))
+        button(c, if (tournamentMode && tournamentRound <= 4 && won) "NEXT CUP MATCH" else "PLAY AGAIN", w * .34f, h * .72f, w * .66f, h * .86f)
         button(c, "HOME", w * .07f, h * .83f, w * .25f, h * .95f, Color.rgb(60, 72, 88))
     }
 
@@ -339,7 +343,7 @@ private class FootverseView(context: android.content.Context) : View(context) {
             5 -> {
                 if (y > h*.80f && x < w*.28f) screen = 0
                 else if (y > h*.68f) {
-                    if (tournamentRound <= 4 && scoreHome > scoreAway) { matchNumber++; startMatch(true) }
+                    if (tournamentMode && tournamentRound <= 4 && scoreHome > scoreAway) { matchNumber++; startMatch(true) }
                     else startMatch()
                 }
             }
